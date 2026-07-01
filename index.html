@@ -863,7 +863,7 @@ input,textarea,select{font-family:inherit}
 class Component extends DCLogic {
   state = {
     page: 'home', scrolled: false, isMobile: false, menuOpen: false,
-    counts: { projects: 0, products: 0, fields: 0, survey: 0 }, counted: false,
+    counts: { projects: 500, products: 8, fields: 6, survey: 100 }, counted: false,
     filter: '전체', detailCase: null,
     form: { name:'', company:'', phone:'', email:'', items:[], location:'', volume:'', file:'', schedule:'', memo:'', agree:false },
     errors: {}, submitted: false, activeProduct: null,
@@ -895,20 +895,31 @@ class Component extends DCLogic {
   go(page) { this.setState({ page, menuOpen: false, submitted: false }); try { window.scrollTo(0, 0); } catch(e){} }
   openCase(c) { this.setState({ page:'caseDetail', detailCase:c, menuOpen:false, submitted:false }); try { window.scrollTo(0,0); } catch(e){} }
 
+  // 최종값(counts=T)은 초기 state에서 이미 표시됨 → 스크롤/JS/IO 여부와 무관하게 항상 노출.
+  // 섹션이 화면에 들어오면 0→최종으로 count-up을 한 번만 재생하고, 끝나면 정확한 최종값으로 정지.
   counterRef = (el) => {
     if (!el || this._io) return;
     this._io = new IntersectionObserver((ents) => {
-      ents.forEach((e) => { if (e.isIntersecting && !this.state.counted) { this.setState({ counted: true }); this.runCount(); } });
+      ents.forEach((e) => { if (e.isIntersecting) this.runCount(); });
     }, { threshold: 0.3 });
     this._io.observe(el);
-    // fallback: if IO never fires (non-standard scroll container), still show final numbers
-    this._countFallback = setTimeout(() => { if (!this.state.counted) { this.setState({ counted: true }); this.runCount(); } }, 2800);
   };
   runCount() {
-    const T = { projects:500, products:8, fields:6, survey:100 }, dur=1600, t0=performance.now();
+    if (this.state.counted) return;           // 한 번만 실행 (무한 루프 방지)
+    this.setState({ counted: true });
+    const T = { projects:500, products:8, fields:6, survey:100 };
+    var reduce = false;
+    try { reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){}
+    if (reduce) { this.setState({ counts: { projects:T.projects, products:T.products, fields:T.fields, survey:T.survey } }); return; }
+    const dur=1600, t0=performance.now();
     const tick=(now)=>{ const p=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-p,3);
-      this.setState({ counts:{ projects:Math.round(T.projects*e), products:Math.round(T.products*e), fields:Math.round(T.fields*e), survey:Math.round(T.survey*e) }});
-      if(p<1) requestAnimationFrame(tick); };
+      if (p<1) {
+        this.setState({ counts:{ projects:Math.round(T.projects*e), products:Math.round(T.products*e), fields:Math.round(T.fields*e), survey:Math.round(T.survey*e) }});
+        requestAnimationFrame(tick);
+      } else {
+        this.setState({ counts:{ projects:T.projects, products:T.products, fields:T.fields, survey:T.survey }}); // 정확한 최종값으로 확정 후 정지
+      }
+    };
     requestAnimationFrame(tick);
   }
 
@@ -999,7 +1010,7 @@ class Component extends DCLogic {
     ];
 
     const casesAll = [
-      { id:'c1', cat:'병원·의료', title:'국립재활병원 병동 핸드레일 전면 시공', place:'서울', year:'2025', product:'벽부형·범퍼 핸드레일', featured:true },
+      { id:'c1', cat:'병원·의료', title:'○○재활병원 병동 핸드레일 전면 시공', place:'서울', year:'2025', product:'벽부형·범퍼 핸드레일', featured:true },
       { id:'c2', cat:'병원·의료', title:'○○대학교병원 외래동 범퍼 핸드레일', place:'인천', year:'2025', product:'범퍼 핸드레일' },
       { id:'c3', cat:'병원·의료', title:'○○요양병원 복도 안전 난간', place:'경기', year:'2024', product:'스텐 난간대 · 범퍼 레일' },
       { id:'c4', cat:'학교·교육', title:'○○초등학교 계단 논슬립·난간', place:'서울', year:'2025', product:'논슬립 · 계단 난간대' },
