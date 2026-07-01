@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:#F4F1EA;color:#1A1712;font-family:Pretendard,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;word-break:keep-all;overflow-wrap:break-word}
+::selection{background:#1A1712;color:#F4F1EA}
+button{font-family:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+input,textarea,select{font-family:inherit}
+@keyframes rise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes riseSm{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
+.rv{animation:rise both linear;animation-timeline:view();animation-range:entry 2% cover 22%}
+.rvs{animation:riseSm both linear;animation-timeline:view();animation-range:entry 0% cover 18%}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;scroll-behavior:auto!important}.rv,.rvs{opacity:1!important;transform:none!important}}
+</style>
+</helmet>
+
+<div style="position:relative;width:100%;overflow-x:hidden">
+<div ref="{{ navSentinel }}" style="position:absolute;top:64px;left:0;width:1px;height:1px;pointer-events:none"></div>
+
+<!-- ============ TOP NAV ============ -->
+<header style="position:fixed;top:0;left:0;right:0;z-index:60">
+  <div style="{{ navBarStyle }}">
+    <div style="max-width:1280px;margin:0 auto;width:100%;height:clamp(66px,8vh,88px);display:flex;align-items:center;justify-content:space-between;gap:24px">
+      <a onClick="{{ goHome }}" style="display:flex;align-items:baseline;gap:9px;cursor:pointer;line-height:1">
+        <span style="display:inline-flex;align-items:center;gap:9px"><span style="width:11px;height:11px;background:#8C6F45;display:inline-block;transform:rotate(45deg)"></span><span style="font-weight:800;font-size:clamp(18px,1.5vw,21px);letter-spacing:-.02em">레이블케어</span></span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.22em;opacity:.62;font-weight:500">RABLE CARE</span>
+      </a>
+      <sc-if value="{{ notMobile }}" hint-placeholder-val="{{ true }}">
+        <nav style="display:flex;align-items:center;gap:clamp(20px,2.4vw,44px)">
+          <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="4">
+            <a onClick="{{ item.onClick }}" style="{{ item.style }}">{{ item.label }}</a>
+          </sc-for>
+        </nav>
+        <button onClick="{{ goContact }}" style="{{ navCtaStyle }}">견적문의</button>
+      </sc-if>
+      <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ toggleMenu }}" aria-label="메뉴" style="width:44px;height:44px;display:flex;flex-direction:column;justify-content:center;gap:5px;background:transparent;border:none;padding:10px">
+          <span style="height:1.5px;background:currentColor;display:block;transition:transform .3s;transform:{{ barTop }}"></span>
+          <span style="height:1.5px;background:currentColor;display:block;transition:opacity .2s;opacity:{{ barMidOpacity }}"></span>
+          <span style="height:1.5px;background:currentColor;display:block;transition:transform .3s;transform:{{ barBot }}"></span>
+        </button>
+      </sc-if>
+    </div>
+  </div>
+</header>
+
+<!-- mobile menu -->
+<sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:55;background:#F4F1EA;padding:clamp(66px,8vh,88px) 26px 40px;display:flex;flex-direction:column;animation:fadeIn .25s ease both">
+    <nav style="display:flex;flex-direction:column;border-top:1px solid #E0DACB;margin-top:18px">
+      <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="4">
+        <a onClick="{{ item.onClick }}" style="display:flex;align-items:center;justify-content:space-between;padding:22px 4px;border-bottom:1px solid #E0DACB;font-weight:700;font-size:26px;letter-spacing:-.02em;color:#1A1712"><span>{{ item.label }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#8C6F45">{{ item.idx }}</span></a>
+      </sc-for>
+    </nav>
+    <button onClick="{{ goContact }}" style="margin-top:28px;padding:20px;background:#1A1712;color:#F4F1EA;border:none;font-weight:700;font-size:16px;letter-spacing:.02em">견적 문의하기 →</button>
+    <div style="margin-top:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.05em;color:#8C8577;line-height:1.9;padding-top:30px">T. 1600-0000<br>rablecare@naver.com<br>인천 연수구 아카데미로312번길 177</div>
+  </div>
+</sc-if>
+
+<!-- ============ RIGHT QUICK BANNER (desktop) ============ -->
+<sc-if value="{{ notMobile }}" hint-placeholder-val="{{ true }}">
+  <div style="position:fixed;right:clamp(14px,1.6vw,26px);top:50%;transform:translateY(-50%);z-index:45;display:flex;flex-direction:column;gap:9px">
+    <button onClick="{{ goContact }}" style="width:60px;height:60px;border-radius:3px;border:none;background:#1A1712;color:#F4F1EA;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;box-shadow:0 8px 26px rgba(20,18,12,.16);transition:transform .2s,background .2s" style-hover="transform:translateX(-3px);background:#8C6F45">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="5" y="3" width="14" height="18" rx="1.5"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+      <span style="font-size:10px;font-weight:600;letter-spacing:.02em">견적</span>
+    </button>
+    <a href="#" title="카카오톡 상담" style="width:60px;height:60px;border-radius:3px;background:#FEE500;color:#3A1D1D;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;box-shadow:0 8px 26px rgba(20,18,12,.12);transition:transform .2s" style-hover="transform:translateX(-3px)">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4C7 4 3 7.2 3 11.1c0 2.5 1.7 4.7 4.2 5.9-.2.6-.7 2.3-.8 2.7 0 0 0 .3.2.3.1.1.3 0 .3 0 .4-.1 2.6-1.7 3.5-2.4.4.1.9.1 1.3.1 5 0 9-3.2 9-7.1S17 4 12 4z"/></svg>
+      <span style="font-size:10px;font-weight:700;letter-spacing:.02em">카톡</span>
+    </a>
+    <a href="#" title="네이버 톡톡" style="width:60px;height:60px;border-radius:3px;background:#03C75A;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;box-shadow:0 8px 26px rgba(20,18,12,.12);transition:transform .2s" style-hover="transform:translateX(-3px)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5h16v11H12l-4 3v-3H4z" stroke-linejoin="round"/></svg>
+      <span style="font-size:10px;font-weight:700;letter-spacing:.02em">톡톡</span>
+    </a>
+    <a href="tel:16000000" title="전화 상담" style="width:60px;height:60px;border-radius:3px;background:#F4F1EA;border:1px solid #DAD4C6;color:#1A1712;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;box-shadow:0 8px 26px rgba(20,18,12,.08);transition:transform .2s,border-color .2s" style-hover="transform:translateX(-3px);border-color:#1A1712">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3h4l2 5-2.5 1.5a11 11 0 0 0 5 5L16 12l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 4 5a2 2 0 0 1 2-2z" stroke-linejoin="round"/></svg>
+      <span style="font-size:10px;font-weight:600;letter-spacing:.02em">전화</span>
+    </a>
+  </div>
+</sc-if>
+
+<!-- ============ MOBILE BOTTOM QUICK BAR ============ -->
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;left:0;right:0;bottom:0;z-index:45;display:grid;grid-template-columns:repeat(4,1fr);background:#1A1712;box-shadow:0 -6px 24px rgba(20,18,12,.2)">
+    <button onClick="{{ goContact }}" style="background:#8C6F45;border:none;color:#fff;padding:13px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:600">견적신청</button>
+    <a href="#" style="padding:13px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:600;color:#FEE500">카카오톡</a>
+    <a href="#" style="padding:13px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:600;color:#03C75A">네이버톡톡</a>
+    <a href="tel:16000000" style="padding:13px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:600;color:#F4F1EA">전화</a>
+  </div>
+</sc-if>
+
+<main>
+
+<!-- ================= HOME ================= -->
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="메인">
+
+  <!-- HERO -->
+  <section style="position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;background:#161310;padding:0 clamp(20px,5vw,72px)">
+    <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 1px,transparent 1px 14px)"></div>
+    <div style="position:absolute;inset:0;background:linear-gradient(175deg,rgba(10,9,7,.5) 0%,rgba(10,9,7,.1) 38%,rgba(10,9,7,.82) 100%)"></div>
+    <div style="position:absolute;top:calc(clamp(66px,8vh,88px) + 22px);left:clamp(20px,5vw,72px);z-index:2;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:rgba(245,242,235,.5);border:1px solid rgba(245,242,235,.2);padding:6px 11px;border-radius:2px">[ HERO 이미지 — 병원 복도 핸드레일 시공 전경 ]</div>
+    <div style="position:relative;z-index:2;width:100%;max-width:1280px;margin:0 auto;padding-bottom:clamp(90px,15vh,170px)">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(11px,1vw,13px);letter-spacing:.2em;color:#C9A56E;margin-bottom:26px">핸드레일 · 난간 · 장애인 편의시설 전문 시공</div>
+      <h1 style="margin:0;font-weight:800;letter-spacing:-.035em;line-height:1.06;color:#F7F4ED;font-size:clamp(29px,6.6vw,92px)"><span style="display:block">손이 닿는 모든 곳에,</span><span style="display:block">안전을 <span style="color:#C9A56E">설계</span>합니다</span></h1>
+      <p style="margin:30px 0 0;max-width:540px;color:rgba(245,242,235,.78);font-size:clamp(15px,1.3vw,18px);line-height:1.75;font-weight:400">병원·학교·상업시설·공공기관까지. 설계부터 실측, 시공, 사후관리까지 책임지는<br style="display:none">레이블케어의 전문 시공으로 공간의 안전을 완성합니다.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:38px">
+        <button onClick="{{ goContact }}" style="padding:17px 30px;background:#F4F1EA;color:#1A1712;border:none;font-weight:700;font-size:15px;letter-spacing:.01em;display:inline-flex;align-items:center;gap:10px;transition:transform .2s,background .2s" style-hover="transform:translateY(-2px);background:#fff">견적 문의하기 <span style="font-family:'IBM Plex Mono',monospace">→</span></button>
+        <button onClick="{{ goPortfolio }}" style="padding:17px 30px;background:transparent;color:#F4F1EA;border:1px solid rgba(245,242,235,.4);font-weight:600;font-size:15px;transition:border-color .2s,background .2s" style-hover="border-color:#F4F1EA;background:rgba(255,255,255,.06)">시공사례 보기</button>
+      </div>
+    </div>
+    <div style="position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:2;display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(245,242,235,.55);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em">SCROLL<span style="animation:bob 1.8s ease-in-out infinite">↓</span></div>
+  </section>
+
+  <!-- INTRO -->
+  <section style="padding:clamp(80px,13vh,170px) clamp(20px,5vw,72px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:clamp(32px,5vw,90px);align-items:start">
+      <div class="rvs">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:#8C6F45;margin-bottom:22px">01 — ABOUT</div>
+        <h2 style="margin:0;font-weight:800;letter-spacing:-.03em;line-height:1.14;font-size:clamp(28px,3.6vw,50px);color:#1A1712">믿고 맡길 수 있는<br>안전 시공 파트너</h2>
+      </div>
+      <div class="rvs" style="padding-top:8px">
+        <p style="margin:0;font-size:clamp(16px,1.25vw,18px);line-height:1.85;color:#3A352C;font-weight:400;text-wrap:pretty">레이블케어는 핸드레일과 난간, 장애인 편의시설 시공을 전문으로 하는 B2B 파트너입니다. 건설·인테리어 현장의 까다로운 조건을 이해하고, 정확한 실측과 검증된 자재, 숙련된 시공팀으로 하자 없는 결과를 약속합니다.</p>
+        <p style="margin:22px 0 0;font-size:clamp(16px,1.25vw,18px);line-height:1.85;color:#3A352C;font-weight:400;text-wrap:pretty">단순한 납품이 아닌, 도면 검토부터 사후관리까지 이어지는 책임 시공으로 수많은 병원·학교·공공기관 현장에서 신뢰를 쌓아왔습니다.</p>
+        <button onClick="{{ goAbout }}" style="margin-top:30px;background:transparent;border:none;padding:0;font-weight:700;font-size:15px;color:#1A1712;display:inline-flex;align-items:center;gap:10px;border-bottom:1.5px solid #1A1712;padding-bottom:5px" style-hover="gap:16px">회사소개 자세히 보기 <span style="font-family:'IBM Plex Mono',monospace">→</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- COUNTERS -->
+  <section ref="{{ counterRef }}" style="padding:clamp(64px,10vh,120px) clamp(20px,5vw,72px);background:#1A1712;color:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:#C9A56E;margin-bottom:clamp(36px,5vh,60px)" class="rvs">02 — PERFORMANCE / 검증된 실적</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:rgba(245,242,235,.14)">
+        <sc-for list="{{ counters }}" as="c" hint-placeholder-count="4">
+          <div style="background:#1A1712;padding:clamp(20px,3vw,40px) clamp(16px,2vw,28px)">
+            <div style="display:flex;align-items:baseline;gap:2px"><span style="font-weight:800;letter-spacing:-.04em;font-size:clamp(46px,6vw,86px);line-height:.9">{{ c.val }}</span><span style="font-weight:700;font-size:clamp(20px,2.4vw,34px);color:#C9A56E">{{ c.suffix }}</span></div>
+            <div style="margin-top:16px;font-size:clamp(13px,1vw,15px);color:rgba(245,242,235,.62);font-weight:500;letter-spacing:.01em">{{ c.label }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST LOGOS -->
+  <section style="padding:clamp(46px,7vh,78px) clamp(20px,5vw,72px);background:#F4F1EA;border-top:1px solid #E4DECF">
+    <div style="max-width:1280px;margin:0 auto">
+      <div class="rvs" style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.08em;color:#8C8577;margin-bottom:30px">다양한 현장에서 검증된 시공 · 주요 거래처 <span style="color:#8C6F45">(예시 — 실제 로고로 교체)</span></div>
+      <div class="rvs" style="display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-start">
+        <sc-for list="{{ partners }}" as="pt" hint-placeholder-count="6">
+          <span style="height:52px;min-width:148px;padding:0 24px;display:flex;align-items:center;justify-content:center;border:1px solid #DED7C7;background:#fff;color:#8C8577;font-weight:700;font-size:14.5px;transition:color .2s,border-color .2s" style-hover="color:#8C6F45;border-color:#8C6F45">{{ pt }}</span>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS PREVIEW -->
+  <section style="padding:clamp(80px,13vh,160px) clamp(20px,5vw,72px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto">
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:clamp(40px,6vh,70px)">
+        <div class="rvs">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:#8C6F45;margin-bottom:20px">03 — PRODUCTS</div>
+          <h2 style="margin:0;font-weight:800;letter-spacing:-.03em;line-height:1.12;font-size:clamp(28px,3.6vw,50px)">8가지 전문 제품군</h2>
+        </div>
+        <button onClick="{{ goProducts }}" class="rvs" style="background:transparent;border:none;padding:0 0 5px;font-weight:700;font-size:15px;color:#1A1712;display:inline-flex;align-items:center;gap:10px;border-bottom:1.5px solid #1A1712" style-hover="gap:16px">제품 전체보기 <span style="font-family:'IBM Plex Mono',monospace">→</span></button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:1px;background:#DAD4C6;border:1px solid #DAD4C6">
+        <sc-for list="{{ products }}" as="p" hint-placeholder-count="8">
+          <div onClick="{{ p.onClick }}" style="background:#F4F1EA;cursor:pointer;transition:background .25s" style-hover="background:#EFEBE1">
+            <div style="position:relative;aspect-ratio:4/3;overflow:hidden;background:#E5DFD1;background-image:repeating-linear-gradient(135deg,rgba(26,23,18,.045) 0 1px,transparent 1px 12px);display:flex;align-items:center;justify-content:center">
+              <span style="position:absolute;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:#8C6F45">{{ p.no }}</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:#9A917F;border:1px solid #CFC7B5;padding:5px 9px;border-radius:2px;background:rgba(255,255,255,.45)">PHOTO · 제품컷</span>
+            </div>
+            <div style="padding:clamp(20px,2vw,28px)">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:#A79D89;text-transform:uppercase;margin-bottom:10px">{{ p.en }}</div>
+              <h3 style="margin:0 0 10px;font-weight:700;font-size:clamp(18px,1.5vw,22px);letter-spacing:-.01em;color:#1A1712">{{ p.name }}</h3>
+              <p style="margin:0;font-size:14px;line-height:1.65;color:#6E685C">{{ p.desc }}</p>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- PORTFOLIO PREVIEW -->
+  <section style="padding:clamp(80px,13vh,160px) clamp(20px,5vw,72px);background:#ECE7DC">
+    <div style="max-width:1280px;margin:0 auto">
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:clamp(40px,6vh,70px)">
+        <div class="rvs">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:#8C6F45;margin-bottom:20px">04 — PROJECTS</div>
+          <h2 style="margin:0;font-weight:800;letter-spacing:-.03em;line-height:1.12;font-size:clamp(28px,3.6vw,50px)">현장이 증명하는 시공력</h2>
+        </div>
+        <button onClick="{{ goPortfolio }}" class="rvs" style="background:transparent;border:none;padding:0 0 5px;font-weight:700;font-size:15px;color:#1A1712;display:inline-flex;align-items:center;gap:10px;border-bottom:1.5px solid #1A1712" style-hover="gap:16px">시공사례 전체보기 <span style="font-family:'IBM Plex Mono',monospace">→</span></button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:clamp(14px,1.6vw,22px)">
+        <sc-for list="{{ casePreview }}" as="k" hint-placeholder-count="3">
+          <div onClick="{{ k.onClick }}" style="position:relative;aspect-ratio:4/3.1;overflow:hidden;cursor:pointer;background:#DDD6C6;background-image:repeating-linear-gradient(135deg,rgba(26,23,18,.05) 0 1px,transparent 1px 13px)">
+            <span style="position:absolute;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:#9A917F;border:1px solid #CFC7B5;padding:4px 8px;border-radius:2px;background:rgba(255,255,255,.4)">PHOTO · 시공현장</span>
+            <div style="position:absolute;left:0;right:0;bottom:0;padding:20px;background:linear-gradient(0deg,rgba(20,18,12,.82),transparent);color:#F4F1EA">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:#D8B888;margin-bottom:7px">{{ k.cat }}</div>
+              <div style="font-weight:700;font-size:clamp(16px,1.4vw,19px);line-height:1.3">{{ k.title }}</div>
+            </div>
+            <div style="position:absolute;inset:0;background:rgba(20,18,12,.86);opacity:0;transition:opacity .3s;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px" style-hover="opacity:1">
+              <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;letter-spacing:.18em;font-size:clamp(14px,1.4vw,18px);color:rgba(245,242,235,.35)">RABLE CARE</div>
+              <div style="width:26px;height:1px;background:#C9A56E;margin:16px 0"></div>
+              <div style="color:#F4F1EA;font-weight:600;font-size:15px">{{ k.title }}</div>
+              <div style="color:rgba(245,242,235,.6);font-size:13px;margin-top:6px">{{ k.place }} · {{ k.year }}</div>
+              <div style="margin-top:18px;color:#C9A56E;font-size:13px;font-family:'IBM Plex Mono',monospace">자세히 보기 →</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section style="padding:clamp(80px,13vh,160px) clamp(20px,5vw,72px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto">
+      <div style="margin-bottom:clamp(40px,6vh,70px)" class="rvs">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:#8C6F45;margin-bottom:20px">05 — PROCESS</div>
+        <h2 style="margin:0;font-weight:800;letter-spacing:-.03em;line-height:1.12;font-size:clamp(28px,3.6vw,50px)">상담부터 A/S까지, 6단계 진행</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:1px;background:#DAD4C6;border-top:1px solid #DAD4C6">
+        <sc-for list="{{ steps }}" as="s" hint-placeholder-count="6">
+          <div style="background:#F4F1EA;padding:clamp(26px,2.6vw,38px) clamp(20px,2vw,28px);min-height:210px;display:flex;flex-direction:column;transition:background .25s" style-hover="background:#EFEBE1">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:clamp(28px,3vw,42px);color:#1A1712;letter-spacing:-.02em">{{ s.no }}</span>
+              <span style="color:#8C6F45">{{ s.icon }}</span>
+            </div>
+            <h3 style="margin:auto 0 8px;font-weight:700;font-size:clamp(18px,1.5vw,22px);letter-spacing:-.01em;padding-top:24px">{{ s.title }}</h3>
+            <p style="margin:0;font-size:14px;line-height:1.6;color:#6E685C">{{ s.desc }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section style="padding:clamp(80px,14vh,180px) clamp(20px,5vw,72px);background:#161310;color:#F4F1EA;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.035) 0 1px,transparent 1px 15px)"></div>
+    <div style="position:relative;max-width:1280px;margin:0 auto">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.2em;color:#C9A56E;margin-bottom:26px" class="rvs">GET A QUOTE</div>
+      <h2 style="margin:0;font-weight:800;letter-spacing:-.035em;line-height:1.1;font-size:clamp(30px,5vw,66px)" class="rvs">프로젝트를 계획 중이신가요?</h2>
+      <p style="margin:26px 0 0;max-width:560px;color:rgba(245,242,235,.72);font-size:clamp(15px,1.3vw,18px);line-height:1.75" class="rvs">도면과 현장 조건만 알려주시면 빠르게 가견적을 드립니다.<br>핸드레일·난간·편의시설, 무엇이든 상담하세요.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-start;margin-top:40px" class="rvs">
+        <button onClick="{{ goContact }}" style="padding:18px 34px;background:#F4F1EA;color:#1A1712;border:none;font-weight:700;font-size:16px;display:inline-flex;align-items:center;gap:10px;transition:transform .2s,background .2s" style-hover="transform:translateY(-2px);background:#fff">견적 문의하기 <span style="font-family:'IBM Plex Mono',monospace">→</span></button>
+        <a href="tel:16000000" style="padding:18px 34px;background:transparent;color:#F4F1EA;border:1px solid rgba(245,242,235,.4);font-weight:600;font-size:16px;transition:border-color .2s" style-hover="border-color:#F4F1EA">전화 상담 1600-0000</a>
+      </div>
+    </div>
+  </section>
+
+</div>
+</sc-if>
+
+<sc-if value="{{ isAbout }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="회사소개">
+
+  <!-- header -->
+  <section style="padding:clamp(120px,19vh,210px) clamp(20px,5vw,72px) clamp(48px,7vh,80px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.2em;color:#8C6F45;margin-bottom:26px">ABOUT · 회사소개</div>
+      <h1 style="margin:0;max-width:14ch;font-weight:800;letter-spacing:-.035em;line-height:1.08;font-size:clamp(26px,5.4vw,74px)">믿고 맡길 수 있는<br>안전 시공 파트너</h1>
+      <p style="margin:32px 0 0;max-width:640px;font-size:clamp(16px,1.3vw,19px);line-height:1.85;color:#3A352C;text-wrap:pretty">레이블케어는 핸드레일·난간·장애인 편의시설을 전문으로 하는 B2B 시공 기업입니다. 도면 검토와 정밀 실측, 검증된 자재, 숙련된 시공팀으로 하자 없는 결과를 만들고, 시공 이후의 사후관리까지 책임집니다.</p>
+    </div>
+  </section>
+  <section style="padding:0 clamp(20px,5vw,72px) clamp(20px,4vh,48px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto;position:relative;aspect-ratio:16/6.4;min-height:220px;background:#E1DACB;background-image:repeating-linear-gradient(135deg,rgba(26,23,18,.05) 0 1px,transparent 1px 15px);display:flex;align-items:center;justify-content:center">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.1em;color:#9A917F;border:1px solid #CFC7B5;padding:7px 12px;border-radius:2px;background:rgba(255,255,255,.45)">PHOTO · 대표 시공 현장 / 회사 전경 (16:6)</span>
+    </div>
+  </section>
+
+  <!-- statement -->
+  <section style="padding:clamp(80px,13vh,160px) clamp(20px,5vw,72px);background:#1A1712;color:#F4F1EA;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.035) 0 1px,transparent 1px 15px)"></div>
+    <div style="position:relative;max-width:1280px;margin:0 auto">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:#C9A56E;margin-bottom:34px" class="rvs">OUR BELIEF</div>
+      <p style="margin:0;font-weight:700;letter-spacing:-.025em;line-height:1.28;font-size:clamp(24px,3.6vw,52px);text-wrap:pretty" class="rvs">손잡이 하나에도 사람의 안전이 걸려 있습니다.<br>레이블케어는 <span style="color:#C9A56E">보이지 않는 디테일</span>까지<br>책임지는 시공을 약속합니다.</p>
+    </div>
+  </section>
+
+  <!-- values -->
+  <section style="padding:clamp(80px,13vh,160px) clamp(20px,5vw,72px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto">
+      <div style="margin-bottom:clamp(40px,6vh,64px)" class="rvs">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:#8C6F45;margin-bottom:20px">CORE VALUES</div>
+        <h2 style="margin:0;font-weight:800;letter-spacing:-.03em;line-height:1.12;font-size:clamp(28px,3.6vw,50px)">레이블케어를 선택하는 이유</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:1px;background:#DAD4C6;border:1px solid #DAD4C6">
+        <sc-for list="{{ values }}" as="v" hint-placeholder-count="4">
+          <div style="background:#F4F1EA;padding:clamp(30px,3vw,44px) clamp(24px,2.2vw,32px);min-height:270px;display:flex;flex-direction:column;transition:background .25s" style-hover="background:#EFEBE1">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#8C6F45;letter-spacing:.06em">{{ v.no }}</span>
+            <h3 style="margin:auto 0 12px;font-weight:700;font-size:clamp(20px,1.8vw,25px);letter-spacing:-.01em;padding-top:36px">{{ v.title }}</h3>
+            <p style="margin:0;font-size:14.5px;line-height:1.7;color:#6E685C;text-wrap:pretty">{{ v.desc }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- strengths split -->
+  <section style="padding:clamp(80px,13vh,160px) clamp(20px,5vw,72px);background:#ECE7DC">
+    <div style="max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(32px,5vw,80px);align-items:center">
+      <div class="rvs">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:#8C6F45;margin-bottom:20px">WHY RABLE CARE</div>
+        <h2 style="margin:0 0 32px;font-weight:800;letter-spacing:-.03em;line-height:1.14;font-size:clamp(26px,3.2vw,44px)">경험이 만든<br>시공의 기준</h2>
+        <div style="display:flex;flex-direction:column">
+          <sc-for list="{{ strengths }}" as="s" hint-placeholder-count="3">
+            <div style="display:flex;gap:22px;padding:24px 0;border-top:1px solid #D3CBB9">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#8C6F45;padding-top:4px;flex:none">{{ s.no }}</span>
+              <div><h3 style="margin:0 0 8px;font-weight:700;font-size:clamp(18px,1.5vw,21px)">{{ s.title }}</h3><p style="margin:0;font-size:14.5px;line-height:1.7;color:#5C574C;text-wrap:pretty">{{ s.desc }}</p></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div class="rvs" style="position:relative;aspect-ratio:4/4.6;min-height:340px;background:#DDD6C6;background-image:repeating-linear-gradient(135deg,rgba(26,23,18,.05) 0 1px,transparent 1px 14px);display:flex;align-items:center;justify-content:center">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.1em;color:#9A917F;border:1px solid #CFC7B5;padding:6px 11px;border-radius:2px;background:rgba(255,255,255,.45)">PHOTO · 시공팀 / 작업 디테일</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- history -->
+  <section style="padding:clamp(80px,13vh,160px) clamp(20px,5vw,72px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto">
+      <div class="rvs" style="margin-bottom:clamp(40px,6vh,64px)">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:#8C6F45;margin-bottom:20px">HISTORY · 연혁 <span style="color:#A79D89;letter-spacing:0">(예시 — 실제 연혁으로 교체)</span></div>
+        <h2 style="margin:0;font-weight:800;letter-spacing:-.03em;line-height:1.12;font-size:clamp(28px,3.6vw,50px)">걸어온 길</h2>
+      </div>
+      <div style="border-left:1px solid #DAD4C6;max-width:820px">
+        <sc-for list="{{ history }}" as="h" hint-placeholder-count="4">
+          <div class="rvs" style="position:relative;padding:0 0 clamp(26px,3.6vh,40px) clamp(28px,3vw,44px)">
+            <span style="position:absolute;left:-5px;top:7px;width:9px;height:9px;background:#8C6F45;border-radius:50%;box-shadow:0 0 0 4px #F4F1EA"></span>
+            <div style="font-family:'IBM Plex Mono',monospace;color:#8C6F45;font-weight:600;font-size:clamp(18px,1.8vw,23px);letter-spacing:.02em">{{ h.yr }}</div>
+            <p style="margin:8px 0 0;color:#3A352C;font-size:clamp(15px,1.15vw,17px);line-height:1.7;text-wrap:pretty">{{ h.text }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- certs -->
+  <section style="padding:clamp(80px,13vh,160px) clamp(20px,5vw,72px);background:#ECE7DC">
+    <div style="max-width:1280px;margin:0 auto">
+      <div class="rvs" style="margin-bottom:clamp(40px,6vh,64px)">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:#8C6F45;margin-bottom:20px">CERTIFICATION · 인증 · 면허 <span style="color:#A79D89;letter-spacing:0">(예시 — 실제 보유 항목으로 교체)</span></div>
+        <h2 style="margin:0;font-weight:800;letter-spacing:-.03em;line-height:1.12;font-size:clamp(28px,3.6vw,50px)">검증된 자격과 보증</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:1px;background:#DAD4C6;border:1px solid #DAD4C6">
+        <sc-for list="{{ certs }}" as="ct" hint-placeholder-count="4">
+          <div style="background:#F4F1EA;padding:clamp(28px,2.6vw,40px) clamp(22px,2vw,30px);min-height:180px;display:flex;flex-direction:column">
+            <span style="width:11px;height:11px;background:#8C6F45;transform:rotate(45deg)"></span>
+            <b style="margin:auto 0 8px;font-size:clamp(17px,1.5vw,20px);font-weight:700;padding-top:30px">{{ ct.t }}</b>
+            <span style="color:#6E685C;font-size:13.5px">{{ ct.s }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- fields -->
+  <section style="padding:clamp(80px,13vh,160px) clamp(20px,5vw,72px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto">
+      <div class="rvs" style="margin-bottom:clamp(36px,5vh,54px)">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:#8C6F45;margin-bottom:20px">FIELDS · 대응 시설 유형</div>
+        <h2 style="margin:0;font-weight:800;letter-spacing:-.03em;line-height:1.12;font-size:clamp(28px,3.6vw,50px)">이런 현장을 시공합니다</h2>
+      </div>
+      <div class="rvs" style="display:flex;flex-wrap:wrap;gap:10px">
+        <sc-for list="{{ fields }}" as="fd" hint-placeholder-count="6">
+          <span style="padding:14px 24px;border:1px solid #DAD4C6;background:#fff;font-weight:600;font-size:clamp(14px,1.1vw,16px);border-radius:2px;color:#3A352C">{{ fd }}</span>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- location -->
+  <section style="padding:clamp(80px,13vh,160px) clamp(20px,5vw,72px);background:#ECE7DC">
+    <div style="max-width:1280px;margin:0 auto">
+      <div class="rvs" style="margin-bottom:clamp(36px,5vh,54px)">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:#8C6F45;margin-bottom:20px">LOCATION · 오시는 길</div>
+        <h2 style="margin:0;font-weight:800;letter-spacing:-.03em;line-height:1.12;font-size:clamp(28px,3.6vw,50px)">찾아오시는 길</h2>
+      </div>
+      <div class="rvs" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:clamp(14px,1.6vw,22px);align-items:stretch">
+        <div style="min-height:300px;background:repeating-linear-gradient(45deg,#e2dccf,#e2dccf 13px,#e9e3d6 13px,#e9e3d6 26px);border:1px solid #DAD4C6;display:flex;align-items:center;justify-content:center;color:#9A917F;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.08em">지도 영역 — 실제 지도 임베드로 교체</div>
+        <div style="background:#1A1712;color:#F4F1EA;padding:clamp(30px,3vw,48px);display:flex;flex-direction:column;justify-content:center">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:#C9A56E;margin-bottom:20px">RABLE CARE</div>
+          <h3 style="margin:0 0 24px;font-weight:800;font-size:clamp(20px,2vw,26px);letter-spacing:-.01em">레이블케어 본사</h3>
+          <div style="display:flex;flex-direction:column">
+            <div style="display:flex;gap:16px;padding:14px 0;border-top:1px solid rgba(245,242,235,.14)"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(245,242,235,.5);flex:none;width:44px">주소</span><span style="font-size:14.5px;line-height:1.6">인천 연수구 아카데미로312번길 177</span></div>
+            <div style="display:flex;gap:16px;padding:14px 0;border-top:1px solid rgba(245,242,235,.14)"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(245,242,235,.5);flex:none;width:44px">전화</span><a href="tel:16000000" style="font-size:14.5px;font-weight:600">1600-0000</a></div>
+            <div style="display:flex;gap:16px;padding:14px 0;border-top:1px solid rgba(245,242,235,.14)"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(245,242,235,.5);flex:none;width:44px">메일</span><a href="mailto:rablecare@naver.com" style="font-size:14.5px">rablecare@naver.com</a></div>
+            <div style="display:flex;gap:16px;padding:14px 0;border-top:1px solid rgba(245,242,235,.14)"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:rgba(245,242,235,.5);flex:none;width:44px">운영</span><span style="font-size:14.5px">평일 09:00 – 18:00</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- process compact -->
+  <section style="padding:clamp(80px,13vh,160px) clamp(20px,5vw,72px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto">
+      <div style="margin-bottom:clamp(40px,6vh,64px)" class="rvs">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:#8C6F45;margin-bottom:20px">PROCESS · 진행 절차</div>
+        <h2 style="margin:0;font-weight:800;letter-spacing:-.03em;line-height:1.12;font-size:clamp(28px,3.6vw,50px)">상담부터 A/S까지, 6단계</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:1px;background:#DAD4C6;border-top:1px solid #DAD4C6">
+        <sc-for list="{{ steps }}" as="s" hint-placeholder-count="6">
+          <div style="background:#F4F1EA;padding:clamp(26px,2.6vw,38px) clamp(20px,2vw,28px);min-height:200px;display:flex;flex-direction:column;transition:background .25s" style-hover="background:#EFEBE1">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:clamp(26px,2.8vw,40px);letter-spacing:-.02em">{{ s.no }}</span><span style="color:#8C6F45">{{ s.icon }}</span></div>
+            <h3 style="margin:auto 0 8px;font-weight:700;font-size:clamp(17px,1.4vw,21px);padding-top:22px">{{ s.title }}</h3>
+            <p style="margin:0;font-size:13.5px;line-height:1.6;color:#6E685C">{{ s.desc }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section style="padding:clamp(80px,13vh,170px) clamp(20px,5vw,72px);background:#161310;color:#F4F1EA;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.035) 0 1px,transparent 1px 15px)"></div>
+    <div style="position:relative;max-width:1280px;margin:0 auto">
+      <h2 style="margin:0;font-weight:800;letter-spacing:-.035em;line-height:1.1;font-size:clamp(28px,4.6vw,60px)" class="rvs">함께할 준비가 되어 있습니다</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-start;margin-top:38px" class="rvs">
+        <button onClick="{{ goContact }}" style="padding:18px 34px;background:#F4F1EA;color:#1A1712;border:none;font-weight:700;font-size:16px;display:inline-flex;align-items:center;gap:10px;transition:transform .2s,background .2s" style-hover="transform:translateY(-2px);background:#fff">견적 문의하기 <span style="font-family:'IBM Plex Mono',monospace">→</span></button>
+        <button onClick="{{ goPortfolio }}" style="padding:18px 34px;background:transparent;color:#F4F1EA;border:1px solid rgba(245,242,235,.4);font-weight:600;font-size:16px;transition:border-color .2s" style-hover="border-color:#F4F1EA">시공사례 보기</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+</sc-if>
+<sc-if value="{{ isProducts }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="제품소개">
+
+  <!-- header -->
+  <section style="padding:clamp(120px,19vh,210px) clamp(20px,5vw,72px) clamp(48px,7vh,80px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:clamp(24px,4vw,64px);align-items:end">
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.2em;color:#8C6F45;margin-bottom:26px">PRODUCTS · 제품소개</div>
+        <h1 style="margin:0;font-weight:800;letter-spacing:-.035em;line-height:1.08;font-size:clamp(26px,5.4vw,74px)">현장에 맞는<br>8가지 전문 제품군</h1>
+      </div>
+      <p style="margin:0;font-size:clamp(15px,1.2vw,18px);line-height:1.85;color:#3A352C;text-wrap:pretty">핸드레일부터 난간, 편의시설, 메디컬 트랙까지. 시설 유형과 사용 환경에 맞춰 자재·규격·마감을 제안하고, 필요 시 맞춤 제작으로 대응합니다.</p>
+    </div>
+  </section>
+
+  <!-- grid -->
+  <section style="padding:clamp(24px,4vh,48px) clamp(20px,5vw,72px) clamp(80px,12vh,150px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:1px;background:#DAD4C6;border:1px solid #DAD4C6">
+      <sc-for list="{{ products }}" as="p" hint-placeholder-count="8">
+        <div style="background:#F4F1EA;display:flex;flex-direction:column;transition:background .25s" style-hover="background:#EFEBE1">
+          <div style="position:relative;aspect-ratio:4/3;overflow:hidden;background:#E5DFD1;background-image:repeating-linear-gradient(135deg,rgba(26,23,18,.045) 0 1px,transparent 1px 12px);display:flex;align-items:center;justify-content:center">
+            <span style="position:absolute;top:16px;left:16px;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.1em;color:#8C6F45">{{ p.no }}</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:#9A917F;border:1px solid #CFC7B5;padding:5px 9px;border-radius:2px;background:rgba(255,255,255,.45)">PHOTO · {{ p.name }}</span>
+          </div>
+          <div style="padding:clamp(24px,2.2vw,34px);display:flex;flex-direction:column;flex:1">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:#A79D89;text-transform:uppercase;margin-bottom:12px">{{ p.en }}</div>
+            <h3 style="margin:0 0 8px;font-weight:700;font-size:clamp(20px,1.7vw,25px);letter-spacing:-.01em">{{ p.name }}</h3>
+            <div style="font-size:12.5px;font-weight:700;color:#8C6F45;margin-bottom:13px;letter-spacing:-.005em">용도 · {{ p.use }}</div>
+            <p style="margin:0 0 22px;font-size:14.5px;line-height:1.7;color:#6E685C;text-wrap:pretty">{{ p.desc }}</p>
+            <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:auto">
+              <sc-for list="{{ p.tags }}" as="t" hint-placeholder-count="3">
+                <span style="font-size:12px;font-weight:500;color:#5C574C;background:#ECE7DC;border:1px solid #DED7C7;padding:5px 10px;border-radius:2px">{{ t }}</span>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- custom note -->
+  <section style="padding:clamp(64px,10vh,120px) clamp(20px,5vw,72px);background:#ECE7DC">
+    <div style="max-width:1280px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:clamp(28px,4vw,64px);align-items:center">
+      <div class="rvs">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:#8C6F45;margin-bottom:18px">CUSTOM WORK</div>
+        <h2 style="margin:0;font-weight:800;letter-spacing:-.03em;line-height:1.16;font-size:clamp(24px,3vw,40px)">규격이 없다면,<br>맞춤 제작합니다</h2>
+      </div>
+      <p style="margin:0;font-size:clamp(15px,1.2vw,18px);line-height:1.85;color:#3A352C;text-wrap:pretty" class="rvs">표준 제품으로 해결되지 않는 특수 구간·비정형 공간도 실측 기반 맞춤 설계로 대응합니다. 도면과 현장 사진을 보내주시면 적합한 제품과 공법을 함께 제안해 드립니다.</p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section style="padding:clamp(80px,13vh,170px) clamp(20px,5vw,72px);background:#161310;color:#F4F1EA;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.035) 0 1px,transparent 1px 15px)"></div>
+    <div style="position:relative;max-width:1280px;margin:0 auto">
+      <h2 style="margin:0;font-weight:800;letter-spacing:-.035em;line-height:1.1;font-size:clamp(28px,4.6vw,60px)" class="rvs">어떤 제품이 맞을지 상담하세요</h2>
+      <p style="margin:24px 0 0;max-width:520px;color:rgba(245,242,235,.72);font-size:clamp(15px,1.3vw,18px);line-height:1.75" class="rvs">현장 조건만 알려주시면 적합한 제품과 가견적을 함께 드립니다.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-start;margin-top:38px" class="rvs">
+        <button onClick="{{ goContact }}" style="padding:18px 34px;background:#F4F1EA;color:#1A1712;border:none;font-weight:700;font-size:16px;display:inline-flex;align-items:center;gap:10px;transition:transform .2s,background .2s" style-hover="transform:translateY(-2px);background:#fff">견적 문의하기 <span style="font-family:'IBM Plex Mono',monospace">→</span></button>
+        <button onClick="{{ goPortfolio }}" style="padding:18px 34px;background:transparent;color:#F4F1EA;border:1px solid rgba(245,242,235,.4);font-weight:600;font-size:16px;transition:border-color .2s" style-hover="border-color:#F4F1EA">시공사례 보기</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+</sc-if>
+<sc-if value="{{ isPortfolio }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="시공사례">
+
+  <!-- header -->
+  <section style="padding:clamp(120px,19vh,210px) clamp(20px,5vw,72px) clamp(36px,5vh,56px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.2em;color:#8C6F45;margin-bottom:26px">PROJECTS · 시공사례</div>
+      <h1 style="margin:0;font-weight:800;letter-spacing:-.035em;line-height:1.08;font-size:clamp(26px,5.4vw,74px)">현장이 증명하는<br>시공력</h1>
+      <p style="margin:30px 0 0;max-width:600px;font-size:clamp(15px,1.2vw,18px);line-height:1.85;color:#3A352C;text-wrap:pretty">병원·학교·상업시설·공공기관까지, 다양한 현장에서 축적한 시공 경험. 카테고리별로 대표 사례를 확인해 보세요.</p>
+    </div>
+  </section>
+
+  <!-- filter -->
+  <section style="padding:0 clamp(20px,5vw,72px) clamp(36px,5vh,56px);background:#F4F1EA;position:sticky;top:clamp(66px,8vh,88px);z-index:20">
+    <div style="max-width:1280px;margin:0 auto;padding:18px 0;border-top:1px solid #DAD4C6;border-bottom:1px solid #DAD4C6;background:#F4F1EA;display:flex;flex-wrap:wrap;gap:9px;align-items:center">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:#A79D89;margin-right:6px">FILTER</span>
+      <sc-for list="{{ cats }}" as="c" hint-placeholder-count="6">
+        <button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.name }}</button>
+      </sc-for>
+    </div>
+  </section>
+
+  <!-- featured + grid -->
+  <section style="padding:0 clamp(20px,5vw,72px) clamp(80px,12vh,150px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto">
+
+      <!-- featured -->
+      <div onClick="{{ featured.onClick }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));border:1px solid #DAD4C6;margin-bottom:clamp(14px,1.6vw,22px);background:#ECE7DC;cursor:pointer">
+        <div style="position:relative;aspect-ratio:16/10;min-height:280px;overflow:hidden;cursor:pointer;background:#D8D0BF;background-image:repeating-linear-gradient(135deg,rgba(26,23,18,.05) 0 1px,transparent 1px 14px)">
+          <span style="position:absolute;top:18px;left:18px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;color:#8C7A5C;border:1px solid #C4B79C;padding:5px 10px;border-radius:2px;background:rgba(255,255,255,.5)">PHOTO · 대표 시공 현장</span>
+          <div style="position:absolute;inset:0;background:rgba(20,18,12,.86);opacity:0;transition:opacity .3s;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px" style-hover="opacity:1">
+            <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;letter-spacing:.2em;font-size:clamp(18px,2.2vw,28px);color:rgba(245,242,235,.32)">RABLE CARE</div>
+            <div style="width:30px;height:1px;background:#C9A56E;margin:18px 0"></div>
+            <div style="color:#C9A56E;font-size:14px;font-family:'IBM Plex Mono',monospace">자세히 보기 →</div>
+          </div>
+        </div>
+        <div style="padding:clamp(30px,3.4vw,52px);display:flex;flex-direction:column;justify-content:center">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px"><span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#F4F1EA;background:#8C6F45;padding:5px 10px;border-radius:2px">대표 시공</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#8C6F45;letter-spacing:.06em">{{ featured.cat }}</span></div>
+          <h2 style="margin:0 0 18px;font-weight:800;letter-spacing:-.025em;line-height:1.18;font-size:clamp(24px,2.8vw,40px);text-wrap:pretty">{{ featured.title }}</h2>
+          <p style="margin:0 0 26px;font-size:15px;line-height:1.8;color:#5C574C;max-width:46ch;text-wrap:pretty">현장 여건에 맞춘 정밀 실측과 규격 설계, 검증된 자재로 시공했습니다. 이용자 동선과 안전 기준을 최우선으로 고려한 대표 프로젝트입니다.</p>
+          <div style="display:flex;gap:28px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:#3A352C"><span><span style="color:#A79D89">위치 </span>{{ featured.place }}</span><span><span style="color:#A79D89">연도 </span>{{ featured.year }}</span></div>
+        </div>
+      </div>
+
+      <!-- grid -->
+      <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:clamp(14px,1.6vw,22px)">
+          <sc-for list="{{ gridCases }}" as="k" hint-placeholder-count="6">
+            <div onClick="{{ k.onClick }}" style="position:relative;aspect-ratio:4/3.1;overflow:hidden;cursor:pointer;background:#DDD6C6;background-image:repeating-linear-gradient(135deg,rgba(26,23,18,.05) 0 1px,transparent 1px 13px)">
+              <span style="position:absolute;top:14px;left:14px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:#9A917F;border:1px solid #CFC7B5;padding:4px 8px;border-radius:2px;background:rgba(255,255,255,.4)">PHOTO · 시공현장</span>
+              <div style="position:absolute;left:0;right:0;bottom:0;padding:20px;background:linear-gradient(0deg,rgba(20,18,12,.85),transparent);color:#F4F1EA">
+                <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;color:#D8B888;margin-bottom:7px">{{ k.cat }} · {{ k.place }}</div>
+                <div style="font-weight:700;font-size:clamp(15px,1.3vw,18px);line-height:1.32;text-wrap:pretty">{{ k.title }}</div>
+              </div>
+              <div style="position:absolute;inset:0;background:rgba(20,18,12,.87);opacity:0;transition:opacity .3s;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px" style-hover="opacity:1">
+                <div style="font-family:'IBM Plex Mono',monospace;font-weight:600;letter-spacing:.18em;font-size:clamp(13px,1.3vw,17px);color:rgba(245,242,235,.32)">RABLE CARE</div>
+                <div style="width:26px;height:1px;background:#C9A56E;margin:15px 0"></div>
+                <div style="color:#F4F1EA;font-weight:600;font-size:14.5px;line-height:1.35">{{ k.title }}</div>
+                <div style="color:rgba(245,242,235,.6);font-size:12.5px;margin-top:6px">{{ k.place }} · {{ k.year }}</div>
+                <div style="margin-top:16px;color:#C9A56E;font-size:12.5px;font-family:'IBM Plex Mono',monospace">자세히 보기 →</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noMore }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:48px 24px;text-align:center;border:1px dashed #D3CBB9;color:#8C8577;font-size:14.5px;line-height:1.7">해당 카테고리의 추가 시공사례가 곧 업데이트됩니다.</div>
+      </sc-if>
+
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section style="padding:clamp(80px,13vh,170px) clamp(20px,5vw,72px);background:#161310;color:#F4F1EA;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.035) 0 1px,transparent 1px 15px)"></div>
+    <div style="position:relative;max-width:1280px;margin:0 auto">
+      <h2 style="margin:0;font-weight:800;letter-spacing:-.035em;line-height:1.1;font-size:clamp(28px,4.6vw,60px)" class="rvs">다음 현장의 파트너가 되겠습니다</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-start;margin-top:38px" class="rvs">
+        <button onClick="{{ goContact }}" style="padding:18px 34px;background:#F4F1EA;color:#1A1712;border:none;font-weight:700;font-size:16px;display:inline-flex;align-items:center;gap:10px;transition:transform .2s,background .2s" style-hover="transform:translateY(-2px);background:#fff">견적 문의하기 <span style="font-family:'IBM Plex Mono',monospace">→</span></button>
+        <a href="tel:16000000" style="padding:18px 34px;background:transparent;color:#F4F1EA;border:1px solid rgba(245,242,235,.4);font-weight:600;font-size:16px;transition:border-color .2s" style-hover="border-color:#F4F1EA">전화 상담 1600-0000</a>
+      </div>
+    </div>
+  </section>
+
+</div>
+</sc-if>
+<sc-if value="{{ isCaseDetail }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="시공사례 상세">
+
+  <!-- header -->
+  <section style="padding:clamp(116px,18vh,200px) clamp(20px,5vw,72px) clamp(30px,4vh,46px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;color:#A79D89;margin-bottom:22px"><a onClick="{{ goPortfolio }}" style="cursor:pointer;color:#8C6F45" style-hover="color:#1A1712">시공사례</a> / 프로젝트 상세</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.16em;color:#8C6F45;margin-bottom:18px">{{ detailCase.cat }}</div>
+      <h1 style="margin:0;max-width:20ch;font-weight:800;letter-spacing:-.03em;line-height:1.1;font-size:clamp(30px,4.4vw,62px)">{{ detailCase.title }}</h1>
+    </div>
+  </section>
+
+  <section style="padding:0 clamp(20px,5vw,72px) clamp(80px,12vh,150px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto">
+
+      <!-- hero image -->
+      <div style="position:relative;aspect-ratio:16/7;min-height:260px;overflow:hidden;background:#D8D0BF;background-image:repeating-linear-gradient(135deg,rgba(26,23,18,.05) 0 1px,transparent 1px 15px)">
+        <span style="position:absolute;top:18px;left:18px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;color:#8C7A5C;border:1px solid #C4B79C;padding:5px 10px;border-radius:2px;background:rgba(255,255,255,.5)">PHOTO · 대표 시공 이미지</span>
+        <span style="position:absolute;left:22px;bottom:20px;font-family:'IBM Plex Mono',monospace;font-weight:600;letter-spacing:.16em;font-size:12px;color:rgba(60,50,36,.7);border:1.5px solid rgba(60,50,36,.4);padding:7px 15px;border-radius:2px">RABLE CARE</span>
+      </div>
+
+      <!-- meta -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(50%,180px),1fr));border:1px solid #DAD4C6;border-top:none;margin-bottom:clamp(44px,6vh,68px)">
+        <div style="padding:clamp(20px,2vw,28px);border-right:1px solid #DAD4C6"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#A79D89;letter-spacing:.06em;margin-bottom:8px">시설 유형</div><div style="font-weight:800;font-size:clamp(15px,1.3vw,18px)">{{ detailCase.cat }}</div></div>
+        <div style="padding:clamp(20px,2vw,28px);border-right:1px solid #DAD4C6"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#A79D89;letter-spacing:.06em;margin-bottom:8px">적용 제품</div><div style="font-weight:800;font-size:clamp(15px,1.3vw,18px)">{{ detailCase.product }}</div></div>
+        <div style="padding:clamp(20px,2vw,28px);border-right:1px solid #DAD4C6"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#A79D89;letter-spacing:.06em;margin-bottom:8px">현장 위치</div><div style="font-weight:800;font-size:clamp(15px,1.3vw,18px)">{{ detailCase.place }}</div></div>
+        <div style="padding:clamp(20px,2vw,28px)"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#A79D89;letter-spacing:.06em;margin-bottom:8px">시공 연도</div><div style="font-weight:800;font-size:clamp(15px,1.3vw,18px)">{{ detailCase.year }}</div></div>
+      </div>
+
+      <!-- overview -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:clamp(32px,5vw,72px);align-items:start">
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:#8C6F45;margin-bottom:20px">PROJECT OVERVIEW</div>
+          <p style="margin:0 0 22px;font-weight:700;letter-spacing:-.02em;line-height:1.4;font-size:clamp(20px,2.2vw,30px);text-wrap:pretty">이용자 동선 전체의 <span style="color:#8C6F45">보행 안전</span>을 확보했습니다.</p>
+          <p style="margin:0;font-size:clamp(15px,1.15vw,17px);line-height:1.85;color:#3A352C;text-wrap:pretty">{{ detailCase.overview }}</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1px;background:#DAD4C6;border:1px solid #DAD4C6">
+          <div style="background:#F4F1EA;padding:clamp(20px,2vw,26px)"><b style="display:block;font-size:15px;margin-bottom:6px">시공 범위</b><p style="margin:0;color:#6E685C;font-size:14px;line-height:1.6">{{ detailCase.product }} · 논슬립 · 마감</p></div>
+          <div style="background:#F4F1EA;padding:clamp(20px,2vw,26px)"><b style="display:block;font-size:15px;margin-bottom:6px">핵심 포인트</b><p style="margin:0;color:#6E685C;font-size:14px;line-height:1.6">실측 기반 맞춤 시공 · 안전 기준 준수 · 무단차 마감</p></div>
+          <div style="background:#F4F1EA;padding:clamp(20px,2vw,26px)"><b style="display:block;font-size:15px;margin-bottom:6px">공사 기간</b><p style="margin:0;color:#6E685C;font-size:14px;line-height:1.6">약 1–3주 (현장 여건에 따라 상이)</p></div>
+        </div>
+      </div>
+
+      <!-- gallery -->
+      <div style="margin-top:clamp(56px,8vh,90px)">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.18em;color:#8C6F45;margin-bottom:24px">GALLERY · 시공 사진</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:clamp(12px,1.4vw,18px)">
+          <sc-for list="{{ galleryCells }}" as="g" hint-placeholder-count="6">
+            <div style="aspect-ratio:4/3;background:#DDD6C6;background-image:repeating-linear-gradient(135deg,rgba(26,23,18,.05) 0 1px,transparent 1px 13px);display:flex;align-items:flex-end;padding:14px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;color:#9A917F">PHOTO · 시공 {{ g }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="margin-top:clamp(36px,5vh,52px);display:flex;flex-wrap:wrap;gap:12px">
+        <button onClick="{{ goPortfolio }}" style="padding:16px 28px;background:#fff;color:#1A1712;border:1px solid #DAD4C6;font-weight:700;font-size:15px;transition:border-color .2s" style-hover="border-color:#1A1712">← 목록으로</button>
+        <button onClick="{{ goContact }}" style="padding:16px 28px;background:#1A1712;color:#F4F1EA;border:none;font-weight:700;font-size:15px;display:inline-flex;align-items:center;gap:10px;transition:background .2s" style-hover="background:#8C6F45">비슷한 현장 견적 문의 <span style="font-family:'IBM Plex Mono',monospace">→</span></button>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+</sc-if>
+<sc-if value="{{ isContact }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="상담·견적문의">
+
+  <!-- header -->
+  <section style="padding:clamp(120px,19vh,210px) clamp(20px,5vw,72px) clamp(40px,6vh,64px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.2em;color:#8C6F45;margin-bottom:26px">CONTACT · 상담·견적문의</div>
+      <h1 style="margin:0;font-weight:800;letter-spacing:-.035em;line-height:1.08;font-size:clamp(26px,5.4vw,74px)">프로젝트 견적을<br>문의하세요</h1>
+      <p style="margin:30px 0 0;max-width:600px;font-size:clamp(15px,1.2vw,18px);line-height:1.85;color:#3A352C;text-wrap:pretty">아래 항목을 작성해 주시면 담당자가 확인 후 <b style="font-weight:700;color:#1A1712">1영업일 이내</b>에 연락드립니다. 도면·평면도를 함께 첨부해 주시면 더 정확한 가견적이 가능합니다.</p>
+    </div>
+  </section>
+
+  <section style="padding:0 clamp(20px,5vw,72px) clamp(80px,12vh,150px);background:#F4F1EA">
+    <div style="max-width:1280px;margin:0 auto;display:flex;flex-wrap:wrap;gap:clamp(28px,4vw,60px);align-items:flex-start">
+
+      <!-- FORM COLUMN -->
+      <div style="flex:1 1 480px;min-width:0">
+
+        <sc-if value="{{ notSubmitted }}" hint-placeholder-val="{{ true }}">
+        <form onSubmit="{{ onSubmit }}" style="background:#fff;border:1px solid #E4DECF;padding:clamp(26px,3.4vw,52px)">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:#8C6F45;margin-bottom:30px;padding-bottom:22px;border-bottom:1px solid #EDE8DD">QUOTE REQUEST FORM</div>
+
+          <!-- name / company -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:22px;margin-bottom:24px">
+            <div>
+              <label style="display:block;font-size:13px;font-weight:600;color:#3A352C;margin-bottom:9px">성함 <span style="color:#B4552E">*</span></label>
+              <input value="{{ form.name }}" onChange="{{ onName }}" placeholder="홍길동" style="width:100%;padding:15px 16px;background:#F7F5EF;border:1px solid #DAD4C6;border-radius:2px;font-size:15px;color:#1A1712;outline:none;transition:border-color .2s" style-focus="border-color:#1A1712;background:#fff">
+              <sc-if value="{{ errors.name }}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px;font-size:12.5px;color:#B4552E">{{ errors.name }}</div></sc-if>
+            </div>
+            <div>
+              <label style="display:block;font-size:13px;font-weight:600;color:#3A352C;margin-bottom:9px">업체명</label>
+              <input value="{{ form.company }}" onChange="{{ onCompany }}" placeholder="(주)○○건설" style="width:100%;padding:15px 16px;background:#F7F5EF;border:1px solid #DAD4C6;border-radius:2px;font-size:15px;color:#1A1712;outline:none;transition:border-color .2s" style-focus="border-color:#1A1712;background:#fff">
+            </div>
+          </div>
+
+          <!-- phone / email -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:22px;margin-bottom:24px">
+            <div>
+              <label style="display:block;font-size:13px;font-weight:600;color:#3A352C;margin-bottom:9px">연락처 <span style="color:#B4552E">*</span></label>
+              <input value="{{ form.phone }}" onChange="{{ onPhone }}" placeholder="010-0000-0000" style="width:100%;padding:15px 16px;background:#F7F5EF;border:1px solid #DAD4C6;border-radius:2px;font-size:15px;color:#1A1712;outline:none;transition:border-color .2s" style-focus="border-color:#1A1712;background:#fff">
+              <sc-if value="{{ errors.phone }}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px;font-size:12.5px;color:#B4552E">{{ errors.phone }}</div></sc-if>
+            </div>
+            <div>
+              <label style="display:block;font-size:13px;font-weight:600;color:#3A352C;margin-bottom:9px">이메일</label>
+              <input value="{{ form.email }}" onChange="{{ onEmail }}" placeholder="name@company.com" style="width:100%;padding:15px 16px;background:#F7F5EF;border:1px solid #DAD4C6;border-radius:2px;font-size:15px;color:#1A1712;outline:none;transition:border-color .2s" style-focus="border-color:#1A1712;background:#fff">
+              <sc-if value="{{ errors.email }}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px;font-size:12.5px;color:#B4552E">{{ errors.email }}</div></sc-if>
+            </div>
+          </div>
+
+          <!-- quote items -->
+          <div style="margin-bottom:24px">
+            <label style="display:block;font-size:13px;font-weight:600;color:#3A352C;margin-bottom:12px">견적 항목 <span style="color:#B4552E">*</span> <span style="font-weight:400;color:#9A917F;font-size:12px">복수 선택 가능</span></label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <sc-for list="{{ quoteCats }}" as="q" hint-placeholder-count="8">
+                <button type="button" onClick="{{ q.onClick }}" style="{{ q.style }}">{{ q.name }}</button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ errors.items }}" hint-placeholder-val="{{ false }}"><div style="margin-top:10px;font-size:12.5px;color:#B4552E">{{ errors.items }}</div></sc-if>
+          </div>
+
+          <!-- location / volume -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:22px;margin-bottom:24px">
+            <div>
+              <label style="display:block;font-size:13px;font-weight:600;color:#3A352C;margin-bottom:9px">현장 위치</label>
+              <input value="{{ form.location }}" onChange="{{ onLocation }}" placeholder="예) 인천 연수구 ○○병원" style="width:100%;padding:15px 16px;background:#F7F5EF;border:1px solid #DAD4C6;border-radius:2px;font-size:15px;color:#1A1712;outline:none;transition:border-color .2s" style-focus="border-color:#1A1712;background:#fff">
+            </div>
+            <div>
+              <label style="display:block;font-size:13px;font-weight:600;color:#3A352C;margin-bottom:9px">예상 물량</label>
+              <input value="{{ form.volume }}" onChange="{{ onVolume }}" placeholder="예) 복도 약 40m / 3개 층" style="width:100%;padding:15px 16px;background:#F7F5EF;border:1px solid #DAD4C6;border-radius:2px;font-size:15px;color:#1A1712;outline:none;transition:border-color .2s" style-focus="border-color:#1A1712;background:#fff">
+            </div>
+          </div>
+
+          <!-- file / schedule -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:22px;margin-bottom:24px">
+            <div>
+              <label style="display:block;font-size:13px;font-weight:600;color:#3A352C;margin-bottom:9px">도면·평면도 첨부</label>
+              <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+                <span style="flex:none;padding:13px 18px;background:#1A1712;color:#F4F1EA;font-size:13.5px;font-weight:600;border-radius:2px;white-space:nowrap">파일 선택</span>
+                <span style="font-size:13px;color:#8C8577;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ fileLabel }}</span>
+                <input type="file" onChange="{{ onFile }}" accept=".pdf,.jpg,.jpeg,.png,.dwg,.hwp,.zip" style="display:none">
+              </label>
+              <div style="margin-top:8px;font-size:11.5px;color:#A79D89">PDF·JPG·PNG·DWG 등 · 최대 20MB</div>
+            </div>
+            <div>
+              <label style="display:block;font-size:13px;font-weight:600;color:#3A352C;margin-bottom:9px">희망 상담 일정</label>
+              <input type="date" value="{{ form.schedule }}" onChange="{{ onSchedule }}" style="width:100%;padding:14px 16px;background:#F7F5EF;border:1px solid #DAD4C6;border-radius:2px;font-size:15px;color:#1A1712;outline:none;transition:border-color .2s" style-focus="border-color:#1A1712;background:#fff">
+            </div>
+          </div>
+
+          <!-- memo -->
+          <div style="margin-bottom:26px">
+            <label style="display:block;font-size:13px;font-weight:600;color:#3A352C;margin-bottom:9px">기타 문의사항</label>
+            <textarea value="{{ form.memo }}" onChange="{{ onMemo }}" rows="4" placeholder="현장 특성, 일정, 참고 사항 등을 자유롭게 적어주세요." style="width:100%;padding:15px 16px;background:#F7F5EF;border:1px solid #DAD4C6;border-radius:2px;font-size:15px;color:#1A1712;outline:none;resize:vertical;line-height:1.6;transition:border-color .2s" style-focus="border-color:#1A1712;background:#fff"></textarea>
+          </div>
+
+          <!-- agree -->
+          <div onClick="{{ toggleAgree }}" style="display:flex;gap:12px;align-items:flex-start;cursor:pointer;padding:16px;background:#F7F5EF;border:1px solid #E4DECF;border-radius:2px;margin-bottom:8px">
+            <sc-if value="{{ form.agree }}" hint-placeholder-val="{{ false }}"><span style="flex:none;width:22px;height:22px;border-radius:2px;background:#1A1712;border:1px solid #1A1712;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">✓</span></sc-if>
+            <sc-if value="{{ notAgree }}" hint-placeholder-val="{{ true }}"><span style="flex:none;width:22px;height:22px;border-radius:2px;background:#fff;border:1px solid #C9C1AE"></span></sc-if>
+            <span style="font-size:13.5px;line-height:1.6;color:#5C574C"><b style="font-weight:600;color:#1A1712">[필수]</b> 개인정보 수집·이용에 동의합니다. 수집한 정보는 견적 상담 목적으로만 이용되며 관련 법령에 따라 안전하게 관리됩니다.</span>
+          </div>
+          <sc-if value="{{ errors.agree }}" hint-placeholder-val="{{ false }}"><div style="margin:2px 0 8px;font-size:12.5px;color:#B4552E">{{ errors.agree }}</div></sc-if>
+
+          <button type="submit" style="width:100%;margin-top:20px;padding:20px;background:#1A1712;color:#F4F1EA;border:none;font-weight:700;font-size:16px;letter-spacing:.01em;display:inline-flex;align-items:center;justify-content:center;gap:10px;transition:background .25s" style-hover="background:#8C6F45">견적 문의 접수하기 <span style="font-family:'IBM Plex Mono',monospace">→</span></button>
+          <div style="margin-top:16px;text-align:center;font-size:12px;color:#A79D89">접수 시 담당자 이메일(rablecare@naver.com)로 자동 전달됩니다.</div>
+        </form>
+        </sc-if>
+
+        <!-- success -->
+        <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#1A1712;color:#F4F1EA;padding:clamp(40px,5vw,72px);text-align:center;position:relative;overflow:hidden">
+          <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.035) 0 1px,transparent 1px 15px)"></div>
+          <div style="position:relative">
+            <div style="width:70px;height:70px;border-radius:50%;background:#8C6F45;color:#fff;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 28px">✓</div>
+            <h2 style="margin:0 0 16px;font-weight:800;letter-spacing:-.03em;font-size:clamp(26px,3.4vw,42px)">견적 문의가 접수되었습니다</h2>
+            <p style="margin:0 auto 8px;max-width:460px;color:rgba(245,242,235,.78);font-size:15.5px;line-height:1.8">담당자가 확인 후 <b style="color:#C9A56E;font-weight:600">1영업일 이내</b>에 연락드립니다.<br>접수 내용은 rablecare@naver.com으로 자동 전달되었습니다.</p>
+            <div style="display:inline-flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:26px auto 0;padding:16px 22px;background:rgba(245,242,235,.06);border:1px solid rgba(245,242,235,.14);border-radius:3px;text-align:left;max-width:520px">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#C9A56E;width:100%">접수 요약</span>
+              <span style="font-size:13.5px;color:rgba(245,242,235,.85)">{{ form.name }} 님 · {{ itemsSummary }}</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:34px">
+              <button onClick="{{ resetForm }}" style="padding:15px 28px;background:#F4F1EA;color:#1A1712;border:none;font-weight:700;font-size:15px">새 문의 작성</button>
+              <button onClick="{{ goHome }}" style="padding:15px 28px;background:transparent;color:#F4F1EA;border:1px solid rgba(245,242,235,.4);font-weight:600;font-size:15px">메인으로</button>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+      </div>
+
+      <!-- SIDEBAR -->
+      <aside style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:1px;background:#DAD4C6;border:1px solid #DAD4C6">
+        <div style="background:#F4F1EA;padding:clamp(24px,2.4vw,34px)">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:#8C6F45;margin-bottom:20px">DIRECT CONTACT</div>
+          <a href="tel:16000000" style="display:block;font-weight:800;font-size:clamp(24px,2.4vw,32px);letter-spacing:-.01em;color:#1A1712;margin-bottom:6px">1600-0000</a>
+          <div style="font-size:13px;color:#8C8577">평일 09:00 – 18:00 · 주말·공휴일 휴무</div>
+          <a href="mailto:rablecare@naver.com" style="display:block;margin-top:20px;font-size:15px;color:#3A352C;border-bottom:1px solid #DAD4C6;padding-bottom:16px" style-hover="color:#8C6F45">rablecare@naver.com</a>
+          <div style="margin-top:16px;font-size:14px;line-height:1.7;color:#5C574C">인천 연수구 아카데미로312번길 177</div>
+        </div>
+        <div style="background:#F4F1EA;padding:clamp(24px,2.4vw,34px)">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:#8C6F45;margin-bottom:16px">MESSENGER</div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <a href="#" style="display:flex;align-items:center;justify-content:space-between;padding:15px 18px;background:#FEE500;color:#3A1D1D;font-weight:700;font-size:14.5px;border-radius:2px" style-hover="opacity:.9">카카오톡 상담<span>→</span></a>
+            <a href="#" style="display:flex;align-items:center;justify-content:space-between;padding:15px 18px;background:#03C75A;color:#fff;font-weight:700;font-size:14.5px;border-radius:2px" style-hover="opacity:.9">네이버 톡톡<span>→</span></a>
+          </div>
+        </div>
+        <div style="background:#F4F1EA;padding:clamp(24px,2.4vw,34px)">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:#8C6F45;margin-bottom:16px">HOW IT WORKS</div>
+          <div style="font-size:13.5px;line-height:1.9;color:#5C574C">문의 접수 → 담당자 확인 → 가견적 회신 → 방문 실측 → 정식 견적. 접수부터 가견적까지 보통 1–2영업일이 소요됩니다.</div>
+        </div>
+      </aside>
+
+    </div>
+  </section>
+
+</div>
+</sc-if>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer style="background:#100E0B;color:#F4F1EA;padding:clamp(60px,9vh,100px) clamp(20px,5vw,72px) 40px">
+  <div style="max-width:1280px;margin:0 auto">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:40px;padding-bottom:clamp(40px,6vh,64px);border-bottom:1px solid rgba(245,242,235,.14)">
+      <div>
+        <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:18px"><span style="width:11px;height:11px;background:#8C6F45;display:inline-block;transform:rotate(45deg)"></span><span style="font-weight:800;font-size:21px;letter-spacing:-.02em">레이블케어</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;opacity:.6">RABLE CARE</span></div>
+        <p style="margin:0;max-width:340px;color:rgba(245,242,235,.6);font-size:14px;line-height:1.8">핸드레일 · 난간 · 장애인 편의시설 전문 시공.<br>설계부터 사후관리까지 책임지는 안전 파트너.</p>
+      </div>
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:#C9A56E;margin-bottom:20px">SITEMAP</div>
+        <div style="display:flex;flex-direction:column;gap:13px">
+          <a onClick="{{ goAbout }}" style="cursor:pointer;color:rgba(245,242,235,.78);font-size:14.5px" style-hover="color:#fff">회사소개</a>
+          <a onClick="{{ goProducts }}" style="cursor:pointer;color:rgba(245,242,235,.78);font-size:14.5px" style-hover="color:#fff">제품소개</a>
+          <a onClick="{{ goPortfolio }}" style="cursor:pointer;color:rgba(245,242,235,.78);font-size:14.5px" style-hover="color:#fff">시공사례</a>
+          <a onClick="{{ goContact }}" style="cursor:pointer;color:rgba(245,242,235,.78);font-size:14.5px" style-hover="color:#fff">상담·견적문의</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:#C9A56E;margin-bottom:20px">CONTACT</div>
+        <div style="display:flex;flex-direction:column;gap:13px;color:rgba(245,242,235,.78);font-size:14.5px">
+          <a href="tel:16000000" style="font-weight:600">T. 1600-0000</a>
+          <a href="mailto:rablecare@naver.com">rablecare@naver.com</a>
+          <span style="color:rgba(245,242,235,.55);line-height:1.6">인천 연수구 아카데미로312번길 177</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px 22px;justify-content:space-between;align-items:center;padding-top:26px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.03em;color:rgba(245,242,235,.42)">
+      <span>레이블케어(Rable Care) · 사업자등록번호 203-26-13536</span>
+      <span>© 2026 RABLE CARE. ALL RIGHTS RESERVED.</span>
+    </div>
+  </div>
+  <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}"><div style="height:58px"></div></sc-if>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    page: 'home', scrolled: false, isMobile: false, menuOpen: false,
+    counts: { projects: 0, products: 0, fields: 0, survey: 0 }, counted: false,
+    filter: '전체', detailCase: null,
+    form: { name:'', company:'', phone:'', email:'', items:[], location:'', volume:'', file:'', schedule:'', memo:'', agree:false },
+    errors: {}, submitted: false, activeProduct: null,
+  };
+
+  componentDidMount() {
+    this._onScroll = () => { const s = (window.scrollY||0) > 44; if (s !== this.state.scrolled) this.setState({ scrolled: s }); };
+    this._onResize = () => { const m = window.innerWidth < 860; if (m !== this.state.isMobile) this.setState({ isMobile: m, menuOpen: m ? this.state.menuOpen : false }); };
+    window.addEventListener('scroll', this._onScroll, { passive: true });
+    window.addEventListener('resize', this._onResize);
+    this._onResize();
+  }
+  componentWillUnmount() {
+    window.removeEventListener('scroll', this._onScroll);
+    window.removeEventListener('resize', this._onResize);
+    if (this._io) this._io.disconnect();
+    if (this._navIo) this._navIo.disconnect();
+    if (this._countFallback) clearTimeout(this._countFallback);
+  }
+
+  navSentinel = (el) => {
+    if (!el || this._navIo) return;
+    this._navIo = new IntersectionObserver((ents) => {
+      ents.forEach((e) => { const solid = !e.isIntersecting; if (solid !== this.state.scrolled) this.setState({ scrolled: solid }); });
+    }, { threshold: 0 });
+    this._navIo.observe(el);
+  };
+
+  go(page) { this.setState({ page, menuOpen: false, submitted: false }); try { window.scrollTo(0, 0); } catch(e){} }
+  openCase(c) { this.setState({ page:'caseDetail', detailCase:c, menuOpen:false, submitted:false }); try { window.scrollTo(0,0); } catch(e){} }
+
+  counterRef = (el) => {
+    if (!el || this._io) return;
+    this._io = new IntersectionObserver((ents) => {
+      ents.forEach((e) => { if (e.isIntersecting && !this.state.counted) { this.setState({ counted: true }); this.runCount(); } });
+    }, { threshold: 0.3 });
+    this._io.observe(el);
+    // fallback: if IO never fires (non-standard scroll container), still show final numbers
+    this._countFallback = setTimeout(() => { if (!this.state.counted) { this.setState({ counted: true }); this.runCount(); } }, 2800);
+  };
+  runCount() {
+    const T = { projects:500, products:8, fields:6, survey:100 }, dur=1600, t0=performance.now();
+    const tick=(now)=>{ const p=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-p,3);
+      this.setState({ counts:{ projects:Math.round(T.projects*e), products:Math.round(T.products*e), fields:Math.round(T.fields*e), survey:Math.round(T.survey*e) }});
+      if(p<1) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  }
+
+  setFilter(f){ this.setState({ filter:f }); }
+  field(name){ return (ev)=>{ const v = ev&&ev.target ? ev.target.value : ev; this.setState({ form:{...this.state.form,[name]:v}, errors:{...this.state.errors,[name]:undefined} }); }; }
+  toggleItem(cat){ const cur=this.state.form.items; const items = cur.includes(cat)?cur.filter(x=>x!==cat):[...cur,cat]; this.setState({ form:{...this.state.form,items}, errors:{...this.state.errors,items:undefined} }); }
+  onFile(ev){ const f=ev.target.files&&ev.target.files[0]; this.setState({ form:{...this.state.form,file:f?f.name:''} }); }
+  toggleAgree(){ this.setState({ form:{...this.state.form,agree:!this.state.form.agree}, errors:{...this.state.errors,agree:undefined} }); }
+  submit(ev){ if(ev&&ev.preventDefault) ev.preventDefault(); const f=this.state.form, er={};
+    if(!f.name.trim()) er.name='성함을 입력해 주세요.';
+    if(!f.phone.trim()) er.phone='연락처를 입력해 주세요.'; else if(!/^[0-9\-+\s()]{7,}$/.test(f.phone)) er.phone='연락처 형식을 확인해 주세요.';
+    if(f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) er.email='이메일 형식을 확인해 주세요.';
+    if(f.items.length===0) er.items='견적 항목을 하나 이상 선택해 주세요.';
+    if(!f.agree) er.agree='개인정보 수집·이용에 동의해 주세요.';
+    if(Object.keys(er).length){ this.setState({errors:er}); return; }
+    this.setState({ submitted:true }); try{ window.scrollTo(0,0); }catch(e){}
+  }
+  resetForm(){ this.setState({ submitted:false, form:{ name:'',company:'',phone:'',email:'',items:[],location:'',volume:'',file:'',schedule:'',memo:'',agree:false }, errors:{} }); }
+
+  icon(kind){
+    const p={fill:'none',stroke:'currentColor',strokeWidth:1.5,strokeLinecap:'round',strokeLinejoin:'round'};
+    const paths={
+      chat:['M4 5h16v11H9l-4 3v-3H4z'],
+      doc:['M7 3h7l4 4v14H7z','M14 3v4h4','M10 12h6','M10 16h6'],
+      ruler:['M3 8l5-5 13 13-5 5z','M8 6l2 2','M11 9l2 2','M14 12l2 2'],
+      sign:['M4 20h16','M6 16l9-9 3 3-9 9H6z'],
+      tool:['M14 7l3-3 3 3-3 3','M4 20l9-9','M13 11l3 3-9 9-3-3z'],
+      shield:['M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z','M9 12l2 2 4-4'],
+    };
+    return React.createElement('svg',{width:22,height:22,viewBox:'0 0 24 24',...p},(paths[kind]||[]).map((d,i)=>React.createElement('path',{key:i,d})));
+  }
+
+  renderVals() {
+    const S=this.state;
+    const navSolid = S.scrolled || S.page!=='home' || S.menuOpen;
+    const navPad = { paddingLeft:'clamp(20px,5vw,72px)', paddingRight:'clamp(20px,5vw,72px)' };
+    const navBarStyle = navSolid
+      ? { ...navPad, background:'rgba(244,241,234,.94)', color:'#1A1712', borderBottom:'1px solid #E0DACB', boxShadow:'0 1px 30px rgba(20,18,12,.06)', backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)' }
+      : { ...navPad, background:'transparent', color:'#F5F2EB', borderBottom:'1px solid rgba(245,242,235,.16)' };
+    const navItems = [
+      { label:'회사소개', page:'about', idx:'01' },
+      { label:'제품소개', page:'products', idx:'02' },
+      { label:'시공사례', page:'portfolio', idx:'03' },
+      { label:'상담·견적', page:'contact', idx:'04' },
+    ].map(n=>({ ...n, onClick:()=>this.go(n.page),
+      style:`position:relative;cursor:pointer;font-weight:600;font-size:15px;letter-spacing:-.005em;padding:6px 0;color:inherit;opacity:${S.page===n.page?1:.72};border-bottom:1.5px solid ${S.page===n.page?'currentColor':'transparent'}` }));
+    const navCtaStyle = navSolid
+      ? 'padding:11px 22px;background:#1A1712;color:#F4F1EA;border:none;font-weight:700;font-size:14px;letter-spacing:.01em'
+      : 'padding:11px 22px;background:#F4F1EA;color:#1A1712;border:none;font-weight:700;font-size:14px;letter-spacing:.01em';
+
+    const products = [
+      { no:'01', name:'벽부형 핸드레일', en:'Wall-mounted Handrail', use:'복도·경사로 보행 보조', desc:'벽면에 부착하는 안전 손잡이. 미끄럼·낙상 위험이 높은 구간에 필수.', tags:['병원','요양','공공시설'] },
+      { no:'02', name:'범퍼 핸드레일', en:'Bumper Handrail', use:'벽면 충격 완화 + 보행 보조', desc:'이동·카트가 잦은 복도의 벽면 손상을 막고 보행을 돕는 겸용 레일.', tags:['의료시설','요양시설'] },
+      { no:'03', name:'스텐 난간대', en:'Stainless Railing', use:'실내외 난간', desc:'스테인리스 소재로 내구성과 위생성이 높아 실내외 모두 적합.', tags:['상업','공공','주거'] },
+      { no:'04', name:'계단 난간대', en:'Stair Railing', use:'계단 구간 안전', desc:'계단 경사·폭에 맞춘 맞춤 난간으로 보행 안전을 확보.', tags:['학교','상업','주거'] },
+      { no:'05', name:'유리 난간대', en:'Glass Railing', use:'개방형 난간', desc:'강화유리로 개방감과 디자인을 살린 난간. 로비·매장에 적합.', tags:['상업','주거'] },
+      { no:'06', name:'장애인 편의시설', en:'Accessibility', use:'편의·안전 시설', desc:'장애인편의법 기준을 충족하는 손잡이·경사로·점자블록 등 편의시설.', tags:['복지','공공','의료'] },
+      { no:'07', name:'논슬립', en:'Non-slip', use:'계단 미끄럼 방지', desc:'계단 코에 시공해 미끄럼·낙상을 예방하는 안전 마감재.', tags:['학교','상업','공공'] },
+      { no:'08', name:'메디컬 트랙 시스템', en:'Medical Track System', use:'의료시설 전용 트랙·레일', desc:'병원 커튼·장비 이동 등을 위한 의료시설 전용 트랙 시스템.', tags:['병원','의료시설'] },
+      { no:'09', name:'기타 맞춤 제작', en:'Custom Work', use:'현장 맞춤', desc:'현장 조건에 맞춘 특수 규격·형태의 맞춤 설계·제작으로 대응합니다.', tags:['전 시설'] },
+    ].map(p=>({ ...p, onClick:()=>this.go('products') }));
+
+    const steps = [
+      { no:'01', title:'초기 상담', desc:'요구사항과 현장 조건을 파악합니다.', icon:this.icon('chat') },
+      { no:'02', title:'가견적', desc:'도면·물량 기반 개략 견적을 드립니다.', icon:this.icon('doc') },
+      { no:'03', title:'방문 실측', desc:'현장을 정밀 실측하고 검토합니다.', icon:this.icon('ruler') },
+      { no:'04', title:'계약·발주', desc:'사양을 확정하고 자재를 발주합니다.', icon:this.icon('sign') },
+      { no:'05', title:'현장 시공', desc:'전문 시공팀이 직접 투입됩니다.', icon:this.icon('tool') },
+      { no:'06', title:'검수·A/S', desc:'최종 검수와 사후 관리를 책임집니다.', icon:this.icon('shield') },
+    ];
+
+    const values = [
+      { no:'V.01', title:'전문 설계 역량', desc:'현장 조건과 도면을 정밀 검토해 규격·동선·안전 기준에 맞는 최적안을 제안합니다.' },
+      { no:'V.02', title:'책임 시공', desc:'외주가 아닌 자체 숙련 시공팀이 직접 투입되어 마감 품질을 일관되게 유지합니다.' },
+      { no:'V.03', title:'검증된 자재', desc:'스테인리스·알루미늄 등 내구성과 위생성이 검증된 자재만 사용합니다.' },
+      { no:'V.04', title:'사후관리 A/S', desc:'시공 후에도 정기 점검과 신속한 A/S로 오래도록 안전을 지킵니다.' },
+    ];
+    const strengths = [
+      { no:'01', title:'현장 중심의 정밀 실측', desc:'모든 프로젝트는 방문 실측을 기본으로 하여 오차 없는 시공을 실현합니다.' },
+      { no:'02', title:'다양한 시설 유형 대응', desc:'병원·학교·상업·공공까지, 시설 특성에 맞춘 사양과 공법을 보유하고 있습니다.' },
+      { no:'03', title:'투명한 견적과 일정', desc:'가견적 단계부터 물량·단가·일정을 명확히 공유해 신뢰를 우선합니다.' },
+    ];
+    const counters = [
+      { k:'projects', label:'누적 시공 현장', suffix:'+', val:S.counts.projects },
+      { k:'products', label:'전문 제품 카테고리', suffix:'종', val:S.counts.products },
+      { k:'fields', label:'대응 시설 유형', suffix:'개', val:S.counts.fields },
+      { k:'survey', label:'현장 실측 기반', suffix:'%', val:S.counts.survey },
+    ];
+
+    const casesAll = [
+      { id:'c1', cat:'병원·의료', title:'국립재활병원 병동 핸드레일 전면 시공', place:'서울', year:'2025', product:'벽부형·범퍼 핸드레일', featured:true },
+      { id:'c2', cat:'병원·의료', title:'○○대학교병원 외래동 범퍼 핸드레일', place:'인천', year:'2025', product:'범퍼 핸드레일' },
+      { id:'c3', cat:'병원·의료', title:'○○요양병원 복도 안전 난간', place:'경기', year:'2024', product:'스텐 난간대 · 범퍼 레일' },
+      { id:'c4', cat:'학교·교육', title:'○○초등학교 계단 논슬립·난간', place:'서울', year:'2025', product:'논슬립 · 계단 난간대' },
+      { id:'c5', cat:'학교·교육', title:'○○대학교 도서관 유리 난간', place:'대전', year:'2024', product:'유리 난간대' },
+      { id:'c6', cat:'상업시설', title:'○○백화점 에스컬레이터 난간', place:'서울', year:'2025', product:'스텐 난간대' },
+      { id:'c7', cat:'상업시설', title:'○○호텔 로비 스텐 난간', place:'부산', year:'2024', product:'스텐 난간대' },
+      { id:'c8', cat:'복지·공공', title:'○○구민센터 장애인 경사로·편의시설', place:'인천', year:'2025', product:'장애인 편의시설 · 경사로' },
+      { id:'c9', cat:'복지·공공', title:'○○시립복지관 BF 편의시설', place:'경기', year:'2024', product:'BF 편의시설' },
+      { id:'c10', cat:'주거·기타', title:'○○타운하우스 계단 난간', place:'경기', year:'2024', product:'계단 난간대' },
+    ];
+    const openC = (c)=>()=>this.openCase(c);
+    const filtered = S.filter==='전체' ? casesAll : casesAll.filter(c=>c.cat===S.filter);
+    const featuredRaw = S.filter==='전체' ? (casesAll.find(c=>c.featured)||casesAll[0]) : filtered[0];
+    const featured = featuredRaw ? {...featuredRaw, onClick:openC(featuredRaw)} : null;
+    const gridCases = filtered.filter(c=> !featuredRaw || c.id!==featuredRaw.id).map(c=>({...c, onClick:openC(c)}));
+    const dcx = S.detailCase;
+    const detailCase = dcx ? {...dcx, overview:`${dcx.cat} 현장의 특성과 이용자 동선을 고려해 ${dcx.product||'핸드레일·난간'}을 시공했습니다. 현장 실측을 바탕으로 규격·마감을 맞추고 안전 기준을 최우선으로 마무리한 프로젝트입니다.`} : null;
+    const partners = ['○○대학병원','○○건설','○○인테리어','○○복지재단','○○교육청','○○리테일'];
+    const history = [
+      { yr:'2026', text:'메디컬 트랙 시스템 라인업 확대 · 누적 시공 500현장 돌파' },
+      { yr:'2024', text:'병원·복지시설 장애인 편의시설 시공 부문 강화' },
+      { yr:'2022', text:'스텐·유리 난간 및 범퍼 핸드레일 제품군 도입' },
+      { yr:'2020', text:'레이블케어 설립 · 벽부형 핸드레일 전문 시공 시작' },
+    ];
+    const certs = [
+      { t:'실내건축 면허', s:'실내건축공사업 등록' },
+      { t:'사업자 등록', s:'203-26-13536' },
+      { t:'시공 보증', s:'하자 이행 보증' },
+      { t:'편의시설 기준', s:'장애인편의법 준수' },
+    ];
+    const fields = ['병원·의료시설','학교·교육시설','상업시설','주거·기타시설','복지·공공시설','장애인 편의시설'];
+
+    const cats = ['전체','병원·의료','학교·교육','상업시설','주거·기타','복지·공공'].map(c=>({
+      name:c, active:S.filter===c, onClick:()=>this.setFilter(c),
+      style:`padding:11px 20px;border-radius:2px;font-weight:600;font-size:14px;letter-spacing:-.005em;border:1px solid ${S.filter===c?'#1A1712':'#DAD4C6'};background:${S.filter===c?'#1A1712':'transparent'};color:${S.filter===c?'#F4F1EA':'#3A352C'};transition:all .2s;cursor:pointer` }));
+
+    const quoteCats = ['벽부형 핸드레일','범퍼 핸드레일','스텐 난간대','계단 난간대','유리 난간대','장애인 편의시설','논슬립','메디컬 트랙 시스템'].map(c=>{
+      const on = S.form.items.includes(c);
+      return { name:c, checked:on, onClick:()=>this.toggleItem(c),
+        style:`padding:11px 16px;border-radius:2px;font-size:13.5px;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid ${on?'#1A1712':'#DAD4C6'};background:${on?'#1A1712':'#F7F5EF'};color:${on?'#F4F1EA':'#3A352C'}` }; });
+
+    const barTop = S.menuOpen ? 'translateY(6.5px) rotate(45deg)' : 'none';
+    const barBot = S.menuOpen ? 'translateY(-6.5px) rotate(-45deg)' : 'none';
+
+    return {
+      isHome:S.page==='home', isAbout:S.page==='about', isProducts:S.page==='products', isPortfolio:S.page==='portfolio', isContact:S.page==='contact',
+      isMobile:S.isMobile, notMobile:!S.isMobile, menuOpen:S.menuOpen,
+      navItems, navBarStyle, navCtaStyle,
+      barTop, barBot, barMidOpacity:S.menuOpen?0:1,
+      toggleMenu:()=>this.setState({menuOpen:!S.menuOpen}),
+      goHome:()=>this.go('home'), goAbout:()=>this.go('about'), goProducts:()=>this.go('products'), goPortfolio:()=>this.go('portfolio'), goContact:()=>this.go('contact'),
+      products, steps, counters, values, strengths, counterRef:this.counterRef, navSentinel:this.navSentinel,
+      casePreview: casesAll.slice(0,3).map(c=>({...c, onClick:openC(c)})),
+      cats, filtered, featured, gridCases, hasMore:gridCases.length>0, noMore:gridCases.length===0, filterCount:filtered.length, activeFilter:S.filter,
+      isCaseDetail:S.page==='caseDetail', detailCase, partners, history, certs, fields, galleryCells:['1','2','3','4','5','6'],
+      quoteCats, form:S.form, errors:S.errors, submitted:S.submitted,
+      notAgree:!S.form.agree, notSubmitted:!S.submitted, fileLabel:S.form.file||'선택된 파일 없음', itemsSummary:S.form.items.join(', '),
+      onName:this.field('name'), onCompany:this.field('company'), onPhone:this.field('phone'), onEmail:this.field('email'),
+      onLocation:this.field('location'), onVolume:this.field('volume'), onSchedule:this.field('schedule'), onMemo:this.field('memo'),
+      onFile:(e)=>this.onFile(e), toggleAgree:()=>this.toggleAgree(), onSubmit:(e)=>this.submit(e), resetForm:()=>this.resetForm(),
+    };
+  }
+}
+</script>
+</body>
+</html>
